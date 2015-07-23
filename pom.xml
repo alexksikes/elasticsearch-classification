@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>elasticsearch-classification</artifactId>
+    <version>2.0.0-beta1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Elasticsearch Classification plugin</name>
+    <description>The Classification plugin allows to classify documents.</description>
+    <url>https://github.com/elastic/elasticsearch-classification/</url>
+    <inceptionYear>2015</inceptionYear>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:elastic/elasticsearch-classification.git</connection>
+        <developerConnection>scm:git:git@github.com:elastic/elasticsearch-classification.git</developerConnection>
+        <url>http://github.com/elastic/elasticsearch-classification</url>
+    </scm>
+
+    <parent>
+        <groupId>org.elasticsearch.plugin</groupId>
+        <artifactId>elasticsearch-plugin</artifactId>
+        <version>2.0.0-beta1-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-classification</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <!-- currently, the only tests are @Slow -->
+        <tests.ifNoTests>warn</tests.ifNoTests>
+    </properties>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>${basedir}/rest-api-spec</directory>
+                <targetPath>rest-api-spec</targetPath>
+                <includes>
+                    <include>api/*.json</include>
+                    <include>test/**/*.yaml</include>
+                </includes>
+            </testResource>
+        </testResources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>oss-snapshots</id>
+            <name>Sonatype OSS Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+</project>

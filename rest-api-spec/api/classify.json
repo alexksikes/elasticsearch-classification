@@ -1,0 +1,30 @@
+{
+  "classify": {
+    "methods": ["GET", "POST"],
+    "url": {
+      "path": "/{index}/{type}/_classify",
+      "parts": {
+        "index": {
+          "type" : "string",
+          "required": true,
+          "description" : "The index to train on"
+        },
+        "type": {
+          "type" : "string",
+          "required": true,
+          "description" : "The type to train on"
+        }
+      },
+      "params": {
+        "routing": {
+          "type" : "string",
+          "description" : "Specific routing value"
+        }
+      }
+    },
+    "body": {
+      "description" : "The classifier definition",
+      "required": true
+    }
+  }
+}
