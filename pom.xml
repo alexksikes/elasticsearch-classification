@@ -40,8 +40,11 @@
     </dependencies>
 
     <properties>
+        <elasticsearch.plugin.classname>org.elasticsearch.plugin.classification.ClassificationPlugin</elasticsearch.plugin.classname>
         <!-- currently, the only tests are @Slow -->
         <tests.ifNoTests>warn</tests.ifNoTests>
+        <!--<tests.rest.suite>delete_by_query</tests.rest.suite>-->
+        <!--<tests.rest.load_packaged>false</tests.rest.load_packaged>-->
     </properties>
 
     <build>
