@@ -28,7 +28,7 @@ import java.util.Collection;
 
 public class ClassificationPlugin extends AbstractPlugin {
 
-    public static final String NAME = "classify";
+    public static final String NAME = "classification";
 
     @Override
     public String name() {

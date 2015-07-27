@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to Elasticsearch under one or more contributor
+license agreements. See the NOTICE file distributed with this work for additional
+information regarding copyright ownership. ElasticSearch licenses this file to you
+under the Apache License, Version 2.0 (the "License"); you may not use this
+file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+applicable law or agreed to in writing, software distributed under the License
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License. -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.elasticsearch.plugin</groupId>
+        <artifactId>elasticsearch-plugin</artifactId>
+        <version>2.0.0-beta1-SNAPSHOT</version>
+    </parent>
+
     <artifactId>elasticsearch-classification</artifactId>
-    <version>2.0.0-beta1-SNAPSHOT</version>
-    <packaging>jar</packaging>
     <name>Elasticsearch Classification plugin</name>
     <description>The Classification plugin allows to classify documents.</description>
     <url>https://github.com/elastic/elasticsearch-classification/</url>
-    <inceptionYear>2015</inceptionYear>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -25,11 +39,21 @@
         <url>http://github.com/elastic/elasticsearch-classification</url>
     </scm>
 
-    <parent>
-        <groupId>org.elasticsearch.plugin</groupId>
-        <artifactId>elasticsearch-plugin</artifactId>
-        <version>2.0.0-beta1-SNAPSHOT</version>
-    </parent>
+    <properties>
+        <elasticsearch.plugin.classname>org.elasticsearch.plugin.classification.ClassificationPlugin</elasticsearch.plugin.classname>
+        <tests.ifNoTests>warn</tests.ifNoTests>
+        <tests.rest.suite>classify</tests.rest.suite>
+        <tests.rest.load_packaged>false</tests.rest.load_packaged>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
@@ -38,33 +62,6 @@
             <version>5.2.1</version>
         </dependency>
     </dependencies>
-
-    <properties>
-        <elasticsearch.plugin.classname>org.elasticsearch.plugin.classification.ClassificationPlugin</elasticsearch.plugin.classname>
-        <!-- currently, the only tests are @Slow -->
-        <tests.ifNoTests>warn</tests.ifNoTests>
-        <!--<tests.rest.suite>delete_by_query</tests.rest.suite>-->
-        <!--<tests.rest.load_packaged>false</tests.rest.load_packaged>-->
-    </properties>
-
-    <build>
-        <testResources>
-            <testResource>
-                <directory>${basedir}/rest-api-spec</directory>
-                <targetPath>rest-api-spec</targetPath>
-                <includes>
-                    <include>api/*.json</include>
-                    <include>test/**/*.yaml</include>
-                </includes>
-            </testResource>
-        </testResources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
     <repositories>
         <repository>

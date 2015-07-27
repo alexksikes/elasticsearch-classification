@@ -21,6 +21,8 @@ package org.elasticsearch.plugin.classification.test.rest;
 
 import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.plugin.classification.ClassificationPlugin;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
 import org.elasticsearch.test.rest.ElasticsearchRestTestCase;
 import org.elasticsearch.test.rest.ElasticsearchRestTestCase.Rest;
@@ -43,5 +45,13 @@ public class ClassifyRestTests extends ElasticsearchRestTestCase {
     @ParametersFactory
     public static Iterable<Object[]> parameters() throws IOException, RestTestParseException {
         return ElasticsearchRestTestCase.createParameters(0, 1);
+    }
+
+    @Override
+    protected Settings nodeSettings(int nodeOrdinal) {
+        Settings.Builder settings = Settings.builder()
+                .put(super.nodeSettings(nodeOrdinal))
+                .put("plugin.types", ClassificationPlugin.class.getName());
+        return settings.build();
     }
 }

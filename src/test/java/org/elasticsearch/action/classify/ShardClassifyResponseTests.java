@@ -21,6 +21,6 @@ package org.elasticsearch.action.classify;
 
 import org.elasticsearch.test.ElasticsearchTestCase;
 
-public class IndexClassifyResponseTests extends ElasticsearchTestCase {
+public class ShardClassifyResponseTests extends ElasticsearchTestCase {
     
 }
