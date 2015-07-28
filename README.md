@@ -4,7 +4,7 @@ Elasticsearch Classification Plugin
 To build a `SNAPSHOT` version, you need to build it with Maven:
 
 ```bash
-mvn clean install
+mvn clean install -DskipTests
 bin/plugin install classification \
        --url file:target/releases/elasticsearch-classification-X.X.X-SNAPSHOT.zip
 ```
