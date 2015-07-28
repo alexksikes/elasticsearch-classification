@@ -1,12 +1,20 @@
 Elasticsearch Classification Plugin
 ===================================
 
-To build a `SNAPSHOT` version, you need to build it with Maven:
+To build a `SNAPSHOT` version, you can either build it with Maven:
 
 ```bash
 mvn clean install -DskipTests
 bin/plugin install classification \
        --url file:target/releases/elasticsearch-classification-X.X.X-SNAPSHOT.zip
+```
+
+Or grab the latest binary for the Elasticsearch [2.0](https://github.com/elastic/elasticsearch-classification/releases/download/v2.0.0-beta1/elasticsearch-classification-2.0.0-beta1-SNAPSHOT.zip) or for 
+[1.x](https://github.com/elastic/elasticsearch-classification/releases/download/v1.0.1/elasticsearch-classification-1.0.1-SNAPSHOT.zip) and install it:
+
+```bash
+cd /path/to/elasticsearch/
+bin/plugin install classification --url file:/path/to/downloads/elasticsearch-classification-X.X.X-SNAPSHOT.zip
 ```
 
 Example of Usage
