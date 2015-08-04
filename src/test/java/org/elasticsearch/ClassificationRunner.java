@@ -27,7 +27,7 @@ import org.elasticsearch.plugin.classification.ClassificationPlugin;
  */
 public class ClassificationRunner {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Throwable {
         System.setProperty("es.http.cors.enabled", "true");
         System.setProperty("es.script.inline", "on");
         System.setProperty("es.shield.enabled", "false");
@@ -36,6 +36,6 @@ public class ClassificationRunner {
         System.setProperty("es.plugin.types", ClassificationPlugin.class.getName());
         System.setProperty("es.cluster.name", ClassificationRunner.class.getSimpleName());
         
-        ElasticsearchF.main(args);
+        ElasticsearchF.main(new String[]{"start"});
     }
 }

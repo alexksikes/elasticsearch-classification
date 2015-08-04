@@ -20,14 +20,14 @@
 package org.elasticsearch.plugin.classification;
 
 import org.apache.lucene.util.LuceneTestCase.Slow;
-import org.elasticsearch.test.ElasticsearchIntegrationTest;
-import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
+import org.elasticsearch.test.ESIntegTestCase;
+import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
 
-import static org.elasticsearch.test.ElasticsearchIntegrationTest.Scope.SUITE;
+import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
 
 
 @Slow
 @ClusterScope(scope = SUITE, transportClientRatio = 0)
-public class ClassifyTests extends ElasticsearchIntegrationTest {
+public class ClassifyTests extends ESIntegTestCase {
     
 }

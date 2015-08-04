@@ -19,8 +19,8 @@
 
 package org.elasticsearch.action.classify;
 
-import org.elasticsearch.test.ElasticsearchTestCase;
+import org.elasticsearch.test.ESIntegTestCase;
 
-public class ShardClassifyResponseTests extends ElasticsearchTestCase {
+public class ShardClassifyResponseTests extends ESIntegTestCase {
     
 }

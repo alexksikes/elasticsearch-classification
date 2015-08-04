@@ -23,20 +23,20 @@ import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugin.classification.ClassificationPlugin;
-import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
-import org.elasticsearch.test.rest.ElasticsearchRestTestCase;
-import org.elasticsearch.test.rest.ElasticsearchRestTestCase.Rest;
+import org.elasticsearch.test.ESIntegTestCase.ClusterScope;
+import org.elasticsearch.test.rest.ESRestTestCase;
+import org.elasticsearch.test.rest.ESRestTestCase.Rest;
 import org.elasticsearch.test.rest.RestTestCandidate;
 import org.elasticsearch.test.rest.parser.RestTestParseException;
 
 import java.io.IOException;
 
-import static org.elasticsearch.test.ElasticsearchIntegrationTest.Scope.SUITE;
+import static org.elasticsearch.test.ESIntegTestCase.Scope.SUITE;
 
 
 @Rest
 @ClusterScope(scope = SUITE, randomDynamicTemplates = false)
-public class ClassifyRestTests extends ElasticsearchRestTestCase {
+public class ClassifyRestTests extends ESRestTestCase {
 
     public ClassifyRestTests(@Name("yaml") RestTestCandidate testCandidate) {
         super(testCandidate);
@@ -44,7 +44,7 @@ public class ClassifyRestTests extends ElasticsearchRestTestCase {
 
     @ParametersFactory
     public static Iterable<Object[]> parameters() throws IOException, RestTestParseException {
-        return ElasticsearchRestTestCase.createParameters(0, 1);
+        return ESRestTestCase.createParameters(0, 1);
     }
 
     @Override

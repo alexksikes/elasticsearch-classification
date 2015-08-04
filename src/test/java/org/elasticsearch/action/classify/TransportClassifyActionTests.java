@@ -19,8 +19,8 @@
 
 package org.elasticsearch.action.classify;
 
-import org.elasticsearch.test.ElasticsearchSingleNodeTest;
+import org.elasticsearch.test.ESSingleNodeTestCase;
 
-public class TransportClassifyActionTests extends ElasticsearchSingleNodeTest {
+public class TransportClassifyActionTests extends ESSingleNodeTestCase {
     
 }
