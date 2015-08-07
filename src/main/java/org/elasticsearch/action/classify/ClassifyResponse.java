@@ -39,7 +39,8 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
     static final class Fields {
         static final XContentBuilderString TOOK = new XContentBuilderString("took");
         static final XContentBuilderString TEXT = new XContentBuilderString("text");
-        static final XContentBuilderString SCORE = new XContentBuilderString("scores");
+        static final XContentBuilderString CLASS = new XContentBuilderString("class");
+        static final XContentBuilderString SCORES = new XContentBuilderString("scores");
         static final XContentBuilderString FAILURES = new XContentBuilderString("failures");
     }
     
@@ -102,8 +103,8 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         builder.field(Fields.TOOK, tookInMillis);
         builder.field(Fields.TEXT, evalOn);
-        builder.field(classField, assignedClass.utf8ToString());
-        builder.field(Fields.SCORE, score);
+        builder.field(Fields.CLASS, classField);
+        buildScores(builder, params);
 
         if (this.getShardFailures() != null && this.getShardFailures().length != 0) {
             builder.startArray(Fields.FAILURES);
@@ -116,5 +117,12 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         }
         
         return builder;
+    }
+
+    private void buildScores(XContentBuilder builder, Params params) throws IOException {
+        builder.startObject(Fields.SCORES);
+        builder.field("value", assignedClass.utf8ToString());
+        builder.field("score", score);
+        builder.endObject();
     }
 }
