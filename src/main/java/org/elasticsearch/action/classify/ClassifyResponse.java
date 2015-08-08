@@ -78,7 +78,7 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         super.readFrom(in);
         evalOn = in.readString();
         classField = in.readString();
-        classifyResult = ClassifyResult.readClassifyResultFrom(in);
+        classifyResult.readFrom(in);
         tookInMillis = in.readVLong();
     }
 
@@ -106,9 +106,9 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
     }
 
     private void buildScores(XContentBuilder builder, Params params) throws IOException {
-        builder.startObject(Fields.SCORES);
-        builder.value(classifyResult);
-        builder.endObject();
+        builder.startArray(Fields.SCORES);
+        classifyResult.toXContent(builder, params);
+        builder.endArray();
     }
 
     private void buildShardFailures(XContentBuilder builder, Params params) throws IOException {

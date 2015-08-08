@@ -19,9 +19,6 @@
 
 package org.elasticsearch.action.classify;
 
-import com.google.common.collect.LinkedHashMultiset;
-import com.google.common.collect.Multiset;
-import org.apache.lucene.classification.ClassificationResult;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ShardOperationFailedException;
@@ -48,13 +45,11 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * 
@@ -106,54 +101,28 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
     @Override
     protected ClassifyResponse newResponse(ClassifyRequest request, AtomicReferenceArray shardsResponses, ClusterState clusterState) {
         int successfulShards = 0;
-        int failedShards = 0;
-        List<ShardOperationFailedException> shardFailures = null;
+        List<ShardOperationFailedException> shardFailures = new ArrayList<>();
+        List<ClassifyResult> classifyResults = new ArrayList<>();
 
-        // count the assigned classes and keep track of the average scores
-        Multiset<Object> assignedClasses = LinkedHashMultiset.create();
-        Map<Object, Double> aveScores = new HashMap<>();
+        // collect the classify results of each shard
         for (int i = 0; i < shardsResponses.length(); i++) {
             Object shardResponse = shardsResponses.get(i);
             if (shardResponse == null) {
                 // simply ignore non active shards
             } else if (shardResponse instanceof BroadcastShardOperationFailedException) {
-                failedShards++;
-                if (shardFailures == null) {
-                    shardFailures = newArrayList();
-                }
                 shardFailures.add(new DefaultShardOperationFailedException((BroadcastShardOperationFailedException) shardResponse));
             } else {
                 ShardClassifyResponse resp = (ShardClassifyResponse) shardResponse;
-                ClassificationResult result = resp.getClassifyResult();
-
-                Object assignedClass = result.getAssignedClass();
-                assignedClasses.add(assignedClass);
-                Double score = aveScores.get(assignedClass);
-                if (score != null) {
-                    aveScores.put(assignedClass, score + result.getScore());
-                } else {
-                    aveScores.put(assignedClass, result.getScore());
-                }
+                classifyResults.add(resp.getClassifyResult());
                 successfulShards++;
             }
         }
         
-        // now take a majority vote and return as a score the average score of the winners
-        Object winnerClass = null;
-        int winnerCount = 1;
-        for (Multiset.Entry<Object> entry : assignedClasses.entrySet()) {
-            if (entry.getCount() > winnerCount) {
-                winnerCount = entry.getCount();
-                winnerClass = entry.getElement();
-            }
-        }
-        if (winnerClass == null) {
-            throw new ElasticsearchException("unable to evaluate the model, no winner class!");
-        }
-        double winnerAveScore = 1.0 * aveScores.get(winnerClass) / winnerCount;
+        // and take the average of all scores accross shards
+        ClassifyResult classifyResult = ClassifyResult.fromAverage(classifyResults);
 
-        return new ClassifyResponse(request.evalOn(), request.classField(), new ClassifyResult(winnerClass, winnerAveScore),
-                shardsResponses.length(), successfulShards, failedShards, shardFailures, buildTookInMillis(request));
+        return new ClassifyResponse(request.evalOn(), request.classField(), classifyResult, shardsResponses.length(),
+                successfulShards, shardFailures.size(), shardFailures, buildTookInMillis(request));
     }
 
     @Override

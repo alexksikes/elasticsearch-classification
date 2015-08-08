@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.classify;
 
-import org.apache.lucene.classification.ClassificationResult;
 import org.elasticsearch.action.support.broadcast.BroadcastShardResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -42,14 +41,14 @@ class ShardClassifyResponse extends BroadcastShardResponse {
         this.classifyResult = classifyResult;
     }
 
-    public ClassificationResult<Object> getClassifyResult() {
+    public ClassifyResult getClassifyResult() {
         return this.classifyResult;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        classifyResult = ClassifyResult.readClassifyResultFrom(in);
+        this.classifyResult.readFrom(in);
     }
 
     @Override
