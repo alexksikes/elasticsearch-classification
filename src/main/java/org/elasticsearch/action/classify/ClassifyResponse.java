@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.classify;
 
-import org.apache.lucene.classification.ClassificationResult;
 import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.support.broadcast.BroadcastResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -46,19 +45,19 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
     
     private String evalOn;
     private String classField;
-    private ClassificationResult<Object> classificationResult;
+    private ClassifyResult classifyResult;
     private long tookInMillis;
 
     public ClassifyResponse() {
     }
 
-    public ClassifyResponse(String evalOn, String classField, ClassificationResult<Object> classificationResult,
+    public ClassifyResponse(String evalOn, String classField, ClassifyResult classifyResult,
                             int totalShards, int successfulShards, int failedShards,
                             List<ShardOperationFailedException> shardFailures, long tookInMillis) {
         super(totalShards, successfulShards, failedShards, shardFailures);
         this.evalOn = evalOn;
         this.classField = classField;
-        this.classificationResult = classificationResult;
+        this.classifyResult = classifyResult;
         this.tookInMillis = tookInMillis;
     }
 
@@ -70,8 +69,8 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         return this.classField;
     }
 
-    public ClassificationResult<Object> getClassificationResult() {
-        return this.classificationResult;
+    public ClassifyResult getClassifyResult() {
+        return this.classifyResult;
     }
 
     @Override
@@ -79,7 +78,7 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         super.readFrom(in);
         evalOn = in.readString();
         classField = in.readString();
-        classificationResult = readClassificationResultFrom(in);
+        classifyResult = ClassifyResult.readClassifyResultFrom(in);
         tookInMillis = in.readVLong();
     }
 
@@ -88,17 +87,8 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         super.writeTo(out);
         out.writeString(evalOn);
         out.writeString(classField);
-        writeClassificationResultTo(classificationResult, out);
+        classifyResult.writeTo(out);
         out.writeVLong(tookInMillis);
-    }
-
-    public static ClassificationResult<Object> readClassificationResultFrom(StreamInput in) throws IOException {
-        return new ClassificationResult(in.readGenericValue(), in.readDouble());
-    }
-
-    public static void writeClassificationResultTo(ClassificationResult<Object> classificationResult, StreamOutput out) throws IOException {
-        out.writeGenericValue(classificationResult.getAssignedClass());
-        out.writeDouble(classificationResult.getScore());
     }
 
     @Override
@@ -109,13 +99,7 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
         buildScores(builder, params);
 
         if (this.getShardFailures() != null && this.getShardFailures().length != 0) {
-            builder.startArray(Fields.FAILURES);
-            for (ShardOperationFailedException shardFailure : this.getShardFailures()) {
-                builder.startObject();
-                shardFailure.toXContent(builder, params);
-                builder.endObject();
-            }
-            builder.endArray();
+            buildShardFailures(builder, params);
         }
         
         return builder;
@@ -123,8 +107,17 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
 
     private void buildScores(XContentBuilder builder, Params params) throws IOException {
         builder.startObject(Fields.SCORES);
-        builder.field("value", classificationResult.getAssignedClass());
-        builder.field("score", classificationResult.getScore());
+        builder.value(classifyResult);
         builder.endObject();
+    }
+
+    private void buildShardFailures(XContentBuilder builder, Params params) throws IOException {
+        builder.startArray(Fields.FAILURES);
+        for (ShardOperationFailedException shardFailure : this.getShardFailures()) {
+            builder.startObject();
+            shardFailure.toXContent(builder, params);
+            builder.endObject();
+        }
+        builder.endArray();
     }
 }

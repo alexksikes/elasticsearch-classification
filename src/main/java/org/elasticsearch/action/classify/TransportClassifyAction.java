@@ -124,7 +124,7 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
                 shardFailures.add(new DefaultShardOperationFailedException((BroadcastShardOperationFailedException) shardResponse));
             } else {
                 ShardClassifyResponse resp = (ShardClassifyResponse) shardResponse;
-                ClassificationResult result = resp.getClassificationResult();
+                ClassificationResult result = resp.getClassifyResult();
 
                 Object assignedClass = result.getAssignedClass();
                 assignedClasses.add(assignedClass);
@@ -152,7 +152,7 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
         }
         double winnerAveScore = 1.0 * aveScores.get(winnerClass) / winnerCount;
 
-        return new ClassifyResponse(request.evalOn(), request.classField(), new ClassificationResult(winnerClass, winnerAveScore),
+        return new ClassifyResponse(request.evalOn(), request.classField(), new ClassifyResult(winnerClass, winnerAveScore),
                 shardsResponses.length(), successfulShards, failedShards, shardFailures, buildTookInMillis(request));
     }
 
@@ -164,13 +164,13 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
         
         ShardClassificationService classificationService = new ShardClassificationService(indexShard);
 
-        ClassificationResult classificationResult = null;
+        ClassifyResult classifyResult = null;
         try {
-            classificationResult = classificationService.evaluate(request.getEvaluateClassifierRequest());
+            classifyResult = classificationService.evaluate(request.getEvaluateClassifierRequest());
         } catch (IOException e) {
             throw new ElasticsearchException("Unable to evaluate the model at the shard!", e);
         }
-        return new ShardClassifyResponse(request.shardId(), classificationResult);
+        return new ShardClassifyResponse(request.shardId(), classifyResult);
     }
 
     /**

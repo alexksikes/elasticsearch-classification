@@ -29,6 +29,7 @@ import org.apache.lucene.util.NumericUtils;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.classify.ClassifyRequest;
 import org.elasticsearch.action.classify.ClassifyRequest.ModelTypes;
+import org.elasticsearch.action.classify.ClassifyResult;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.mapper.MappedFieldType;
@@ -63,7 +64,7 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         this.queryParser = indexShard.indexService().queryParserService();
     }
 
-    public ClassificationResult<Object> evaluate(ClassifyRequest request) throws IOException {
+    public ClassifyResult evaluate(ClassifyRequest request) throws IOException {
         // get the classifier
         Classifier classifier;
         if (request.modelType() == null) {
@@ -81,7 +82,7 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         if (assignedClass instanceof BytesRef) {
             assignedClass = convertBytesRefToType(request.classField(), (BytesRef) assignedClass);
         }
-        return new ClassificationResult(assignedClass, result.getScore());
+        return new ClassifyResult(assignedClass, result.getScore());
     }
 
     private void trainClassifier(Classifier classifier, ClassifyRequest request) {

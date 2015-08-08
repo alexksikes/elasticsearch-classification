@@ -32,29 +32,29 @@ import java.io.IOException;
  */
 class ShardClassifyResponse extends BroadcastShardResponse {
 
-    private ClassificationResult<Object> classificationResult;
+    private ClassifyResult classifyResult;
 
     ShardClassifyResponse() {
     }
 
-    ShardClassifyResponse(ShardId shardId, ClassificationResult<Object> classificationResult) {
+    ShardClassifyResponse(ShardId shardId, ClassifyResult classifyResult) {
         super(shardId);
-        this.classificationResult = classificationResult;
+        this.classifyResult = classifyResult;
     }
 
-    public ClassificationResult<Object> getClassificationResult() {
-        return this.classificationResult;
+    public ClassificationResult<Object> getClassifyResult() {
+        return this.classifyResult;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        classificationResult = ClassifyResponse.readClassificationResultFrom(in);
+        classifyResult = ClassifyResult.readClassifyResultFrom(in);
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        ClassifyResponse.writeClassificationResultTo(classificationResult, out);
+        classifyResult.writeTo(out);
     }
 }
