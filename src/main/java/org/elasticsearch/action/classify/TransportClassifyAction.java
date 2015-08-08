@@ -22,7 +22,6 @@ package org.elasticsearch.action.classify;
 import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.lucene.classification.ClassificationResult;
-import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ShardOperationFailedException;
@@ -111,8 +110,8 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
         List<ShardOperationFailedException> shardFailures = null;
 
         // count the assigned classes and keep track of the average scores
-        Multiset<BytesRef> assignedClasses = LinkedHashMultiset.create();
-        Map<BytesRef, Double> aveScores = new HashMap<>();
+        Multiset<Object> assignedClasses = LinkedHashMultiset.create();
+        Map<Object, Double> aveScores = new HashMap<>();
         for (int i = 0; i < shardsResponses.length(); i++) {
             Object shardResponse = shardsResponses.get(i);
             if (shardResponse == null) {
@@ -125,23 +124,24 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
                 shardFailures.add(new DefaultShardOperationFailedException((BroadcastShardOperationFailedException) shardResponse));
             } else {
                 ShardClassifyResponse resp = (ShardClassifyResponse) shardResponse;
-                BytesRef assignedClass = resp.getAssignedClass();
-                
+                ClassificationResult result = resp.getClassificationResult();
+
+                Object assignedClass = result.getAssignedClass();
                 assignedClasses.add(assignedClass);
                 Double score = aveScores.get(assignedClass);
                 if (score != null) {
-                    aveScores.put(assignedClass, score + resp.getScore());
+                    aveScores.put(assignedClass, score + result.getScore());
                 } else {
-                    aveScores.put(assignedClass, resp.getScore());
+                    aveScores.put(assignedClass, result.getScore());
                 }
                 successfulShards++;
             }
         }
         
         // now take a majority vote and return as a score the average score of the winners
-        BytesRef winnerClass = null;
+        Object winnerClass = null;
         int winnerCount = 1;
-        for (Multiset.Entry<BytesRef> entry : assignedClasses.entrySet()) {
+        for (Multiset.Entry<Object> entry : assignedClasses.entrySet()) {
             if (entry.getCount() > winnerCount) {
                 winnerCount = entry.getCount();
                 winnerClass = entry.getElement();
@@ -151,9 +151,9 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
             throw new ElasticsearchException("unable to evaluate the model, no winner class!");
         }
         double winnerAveScore = 1.0 * aveScores.get(winnerClass) / winnerCount;
-        
-        return new ClassifyResponse(request.evalOn(), request.classField(), winnerClass, winnerAveScore, shardsResponses.length(), 
-                successfulShards, failedShards, shardFailures, buildTookInMillis(request));
+
+        return new ClassifyResponse(request.evalOn(), request.classField(), new ClassificationResult(winnerClass, winnerAveScore),
+                shardsResponses.length(), successfulShards, failedShards, shardFailures, buildTookInMillis(request));
     }
 
     @Override
@@ -170,8 +170,7 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
         } catch (IOException e) {
             throw new ElasticsearchException("Unable to evaluate the model at the shard!", e);
         }
-        return new ShardClassifyResponse(request.shardId(), (BytesRef) classificationResult.getAssignedClass(), 
-                classificationResult.getScore());
+        return new ShardClassifyResponse(request.shardId(), classificationResult);
     }
 
     /**

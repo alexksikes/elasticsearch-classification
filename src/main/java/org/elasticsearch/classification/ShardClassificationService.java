@@ -25,13 +25,15 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.NumericUtils;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.classify.ClassifyRequest;
 import org.elasticsearch.action.classify.ClassifyRequest.ModelTypes;
-import org.elasticsearch.common.lucene.BytesRefs;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.engine.Engine;
+import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.mapper.MapperService;
+import org.elasticsearch.index.mapper.core.*;
 import org.elasticsearch.index.query.IndexQueryParserService;
 import org.elasticsearch.index.shard.AbstractIndexShardComponent;
 import org.elasticsearch.index.shard.IndexShard;
@@ -61,7 +63,7 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         this.queryParser = indexShard.indexService().queryParserService();
     }
 
-    public ClassificationResult evaluate(ClassifyRequest request) throws IOException {
+    public ClassificationResult<Object> evaluate(ClassifyRequest request) throws IOException {
         // get the classifier
         Classifier classifier;
         if (request.modelType() == null) {
@@ -72,11 +74,16 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         // train the classifier
         trainClassifier(classifier, request);  // boolean perceptron is always retrained for now
         // evaluate the classifier
-        ClassificationResult result = classifier.assignClass(request.evalOn());
-        // convert class to BytesRef for boolean perceptron
-        return new ClassificationResult<BytesRef>(BytesRefs.toBytesRef(result.getAssignedClass()), result.getScore());
+        ClassificationResult<Object> result = classifier.assignClass(request.evalOn());
+
+        // convert the assigned class to the proper field type value
+        Object assignedClass = result.getAssignedClass();
+        if (assignedClass instanceof BytesRef) {
+            assignedClass = convertBytesRefToType(request.classField(), (BytesRef) assignedClass);
+        }
+        return new ClassificationResult(assignedClass, result.getScore());
     }
-    
+
     private void trainClassifier(Classifier classifier, ClassifyRequest request) {
         // parse the query and get analyzer at field if possible
         Query luceneQuery = queryParser.parse(request.trainQuery()).query();
@@ -126,5 +133,24 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
             analyzer = mapperService.analysisService().defaultAnalyzer();
         }
         return analyzer;
+    }
+
+    private Object convertBytesRefToType(String fieldName, BytesRef bytesRef) {
+        MappedFieldType fieldType = indexShard.mapperService().smartNameFieldType(fieldName);
+        switch(fieldType.typeName()) {
+            case FloatFieldMapper.CONTENT_TYPE:
+                return NumericUtils.sortableIntToFloat(NumericUtils.prefixCodedToInt(bytesRef));
+            case DoubleFieldMapper.CONTENT_TYPE:
+                return NumericUtils.sortableLongToDouble(NumericUtils.prefixCodedToLong(bytesRef));
+            case ShortFieldMapper.CONTENT_TYPE:
+            case IntegerFieldMapper.CONTENT_TYPE:
+                return NumericUtils.prefixCodedToInt(bytesRef);
+            case LongFieldMapper.CONTENT_TYPE:
+                return NumericUtils.prefixCodedToLong(bytesRef);
+            case BooleanFieldMapper.CONTENT_TYPE:
+                return fieldType.value(bytesRef);
+            default:
+                return bytesRef.utf8ToString();
+        }
     }
 }

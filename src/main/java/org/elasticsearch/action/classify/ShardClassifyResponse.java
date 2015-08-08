@@ -19,7 +19,7 @@
 
 package org.elasticsearch.action.classify;
 
-import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.classification.ClassificationResult;
 import org.elasticsearch.action.support.broadcast.BroadcastShardResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -32,38 +32,29 @@ import java.io.IOException;
  */
 class ShardClassifyResponse extends BroadcastShardResponse {
 
-    private BytesRef assignedClass;
-    private double score;
+    private ClassificationResult<Object> classificationResult;
 
     ShardClassifyResponse() {
-
     }
 
-    ShardClassifyResponse(ShardId shardId, BytesRef assignedClass, double score) {
+    ShardClassifyResponse(ShardId shardId, ClassificationResult<Object> classificationResult) {
         super(shardId);
-        this.assignedClass = assignedClass;
-        this.score = score;
+        this.classificationResult = classificationResult;
     }
 
-    public BytesRef getAssignedClass() {
-        return this.assignedClass;
-    }
-
-    public double getScore() {
-        return this.score;
+    public ClassificationResult<Object> getClassificationResult() {
+        return this.classificationResult;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        assignedClass = in.readBytesRef();
-        score = in.readDouble();
+        classificationResult = ClassifyResponse.readClassificationResultFrom(in);
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        out.writeBytesRef(assignedClass);
-        out.writeDouble(score);
+        ClassifyResponse.writeClassificationResultTo(classificationResult, out);
     }
 }

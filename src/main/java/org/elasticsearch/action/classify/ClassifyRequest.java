@@ -390,7 +390,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         }
         return this;
     }
-    
+
     /**
      * Parses model definition.
      *
