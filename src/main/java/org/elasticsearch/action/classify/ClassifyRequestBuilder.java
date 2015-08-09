@@ -216,4 +216,9 @@ public class ClassifyRequestBuilder extends BroadcastOperationRequestBuilder<Cla
         request.routing(routing);
         return this;
     }
+
+    public ClassifyRequestBuilder setTopN(int topN) {
+        request.topN(topN);
+        return this;
+    }
 }

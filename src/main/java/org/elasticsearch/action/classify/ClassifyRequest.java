@@ -48,6 +48,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         public static final String BOOLEAN_PERCEPTRON = "boolean_perceptron";
     }
 
+    public static int DEFAULT_TOP_N = 3;
+
     private String trainIndex;
 
     private String trainType;
@@ -67,6 +69,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
     private Settings modelSettings = EMPTY_SETTINGS;
 
     private String routing;
+
+    private int topN = DEFAULT_TOP_N;
 
     long nowInMillis;
     
@@ -355,6 +359,15 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         return this;
     }
 
+    public int topN() {
+        return this.topN;
+    }
+
+    public ClassifyRequest topN(int topN) {
+        this.topN = topN;
+        return this;
+    }
+
     /**
      * Parses model definition.
      *
@@ -384,6 +397,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
                     throw new IllegalArgumentException("malformed model settings section, should include an inner object");
                 }
                 modelSettings((Map<String, Object>) entry.getValue());
+            } else if (name.equals("top_n")) {
+                topN((int) entry.getValue());
             } else {
                 throw new IllegalArgumentException("unknown parameter [" + name + "]");
             }
@@ -446,6 +461,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         analyzer = in.readOptionalString();
         modelType = in.readOptionalString();
         modelSettings = readSettingsFromStream(in);
+        topN = in.readVInt();
     }
 
     @Override
@@ -459,5 +475,6 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         out.writeOptionalString(analyzer);
         out.writeOptionalString(modelType);
         writeSettingsToStream(modelSettings, out);
+        out.writeVInt(topN);
     }
 }

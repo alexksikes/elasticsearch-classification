@@ -121,7 +121,7 @@ public class TransportClassifyAction extends TransportBroadcastAction<ClassifyRe
         // and take the average of all scores accross shards
         ClassifyResult classifyResult = ClassifyResult.fromAverage(classifyResults);
 
-        return new ClassifyResponse(request.evalOn(), request.classField(), classifyResult, shardsResponses.length(),
+        return new ClassifyResponse(request.evalOn(), request.classField(), classifyResult, request.topN(), shardsResponses.length(),
                 successfulShards, shardFailures.size(), shardFailures, buildTookInMillis(request));
     }
 

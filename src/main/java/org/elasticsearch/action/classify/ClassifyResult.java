@@ -17,6 +17,7 @@ import java.util.*;
 public class ClassifyResult implements Streamable, Iterable<ClassificationResult>, ToXContent {
 
     private Map<Object, ClassificationResult> results;
+    private int topN;
 
     public ClassifyResult() {
         this.results = new HashMap<>();
@@ -36,6 +37,10 @@ public class ClassifyResult implements Streamable, Iterable<ClassificationResult
 
     private void add(ClassificationResult classificationResult) {
         this.add(classificationResult, 1);
+    }
+
+    public void setTopN(int topN) {
+        this.topN = topN;
     }
 
     // at some point we should have our own ClassifcationResult class to modify in place
@@ -79,7 +84,7 @@ public class ClassifyResult implements Streamable, Iterable<ClassificationResult
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         List<ClassificationResult> values = new ArrayList<>(results.values());
         Collections.sort(values);
-        values.subList(0, 1);  // until we implement top_n
+        values = values.subList(0, Math.min(topN, values.size()));
         for (ClassificationResult result : values) {
             builder.startObject();
             builder.field("value", result.getAssignedClass());

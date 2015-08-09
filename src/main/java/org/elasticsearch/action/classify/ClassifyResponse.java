@@ -46,18 +46,20 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
     private String evalOn;
     private String classField;
     private ClassifyResult classifyResult;
+    private int topN;
     private long tookInMillis;
 
     public ClassifyResponse() {
     }
 
     public ClassifyResponse(String evalOn, String classField, ClassifyResult classifyResult,
-                            int totalShards, int successfulShards, int failedShards,
+                            int topN, int totalShards, int successfulShards, int failedShards,
                             List<ShardOperationFailedException> shardFailures, long tookInMillis) {
         super(totalShards, successfulShards, failedShards, shardFailures);
         this.evalOn = evalOn;
         this.classField = classField;
         this.classifyResult = classifyResult;
+        this.topN = topN;
         this.tookInMillis = tookInMillis;
     }
 
@@ -107,6 +109,7 @@ public class ClassifyResponse extends BroadcastResponse implements ToXContent {
 
     private void buildScores(XContentBuilder builder, Params params) throws IOException {
         builder.startArray(Fields.SCORES);
+        classifyResult.setTopN(topN);
         classifyResult.toXContent(builder, params);
         builder.endArray();
     }
