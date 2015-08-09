@@ -30,6 +30,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static org.elasticsearch.action.ValidateActions.addValidationError;
@@ -54,7 +55,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
 
     private String trainType;
 
-    private String textField;
+    private String[] textFields;
 
     private String classField;
     
@@ -132,8 +133,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
      *
      * @return the field to train on
      */
-    public String textField() {
-        return textField;
+    public String[] textFields() {
+        return textFields;
     }
 
     /**
@@ -142,8 +143,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
      * @param textField field name to train on
      * @return this request
      */
-    public ClassifyRequest textField(String textField) {
-        this.textField = textField;
+    public ClassifyRequest textFields(String... textField) {
+        this.textFields = textField;
         return this;
     }
 
@@ -378,7 +379,12 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
             String name = entry.getKey();
             if (name.equals("field")) {
-                textField(entry.getValue().toString());
+                textFields(entry.getValue().toString());
+            } else if (name.equals("fields")) {
+                if (!(entry.getValue() instanceof List)) {
+                    throw new IllegalArgumentException("malformed fields, should be an array of strings");
+                }
+                textFields(((List<String>) entry.getValue()).toArray(new String[0]));
             } else if (name.equals("class")) {
                 classField(entry.getValue().toString());
             } else if (name.equals("text")) {
@@ -432,8 +438,8 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
     @Override
     public ActionRequestValidationException validate() {
         ActionRequestValidationException validationException = super.validate();
-        if (textField == null) {
-            validationException = addValidationError("name of the field used to compare documents is missing", validationException);
+        if (textFields == null || textFields.length == 0) {
+            validationException = addValidationError("name of the field used to compare documents is either missing or empty", validationException);
         }
         if (classField == null) {
             validationException = addValidationError("name of the field containing the class assigned to documents is missing", validationException);
@@ -453,7 +459,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        textField = in.readString();
+        textFields = in.readStringArray();
         classField = in.readString();
         trainIndex = in.readString();
         trainType = in.readString();
@@ -467,7 +473,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        out.writeString(textField);
+        out.writeStringArray(textFields);
         out.writeString(classField);
         out.writeString(trainIndex);
         out.writeString(trainType);

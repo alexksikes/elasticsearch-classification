@@ -71,11 +71,11 @@ public class ClassifyRequestBuilder extends BroadcastOperationRequestBuilder<Cla
     /**
      * Sets the field name to train on
      *
-     * @param textField field name to train on
+     * @param textFields field name to train on
      * @return this request
      */
-    public ClassifyRequestBuilder setTextField(String textField) {
-        request.textField(textField);
+    public ClassifyRequestBuilder setTextFields(String... textFields) {
+        request.textFields(textFields);
         return this;
     }
 

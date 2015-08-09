@@ -84,13 +84,14 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
     private void train(Classifier classifier, ClassifyRequest request) {
         // parse the query and get analyzer at field if possible
         Query luceneQuery = queryParser.parse(request.trainQuery()).query();
-        Analyzer analyzer = getAnalyzerAtField(request.textField());
+        // we default to the analyzer at the first field
+        Analyzer analyzer = getAnalyzerAtField(request.textFields()[0]);
 
         // call train method
         final Engine.Searcher searcher = indexShard.acquireSearcher("classify");
         try {
             LeafReader leafReader = SlowCompositeReaderWrapper.wrap(indexShard.acquireSearcher("classify").reader());
-            classifier.train(leafReader, request.textField(), request.classField(), analyzer, luceneQuery);
+            classifier.train(leafReader, request.textFields(), request.classField(), analyzer, luceneQuery);
         } catch (Throwable ex) {
             throw new ElasticsearchException("failed to train model", ex);
         } finally {
