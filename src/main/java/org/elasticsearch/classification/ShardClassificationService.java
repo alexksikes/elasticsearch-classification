@@ -20,7 +20,10 @@
 package org.elasticsearch.classification;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.classification.*;
+import org.apache.lucene.classification.CachingNaiveBayesClassifier;
+import org.apache.lucene.classification.ClassificationResult;
+import org.apache.lucene.classification.Classifier;
+import org.apache.lucene.classification.SimpleNaiveBayesClassifier;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.search.Query;
