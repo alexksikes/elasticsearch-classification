@@ -106,7 +106,7 @@ public class ClassifyResult implements Streamable, Iterable<ClassificationResult
             case LongFieldMapper.CONTENT_TYPE:
                 return NumericUtils.prefixCodedToLong(bytesRef);
             case BooleanFieldMapper.CONTENT_TYPE:
-                return fieldType.value(bytesRef);
+                return fieldType.value(bytesRef.utf8ToString());
             default:
                 return bytesRef.utf8ToString();
         }
