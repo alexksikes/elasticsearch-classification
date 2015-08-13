@@ -31,6 +31,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.classify.ClassifyRequest;
 import org.elasticsearch.action.classify.ClassifyRequest.ModelTypes;
 import org.elasticsearch.action.classify.ClassifyResult;
+import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.mapper.MappedFieldType;
@@ -86,7 +87,12 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
 
     private void train(Classifier classifier, ClassifyRequest request) {
         // parse the query and get analyzer at field if possible
-        Query luceneQuery = queryParser.parse(request.trainQuery()).query();
+        Query luceneQuery;
+        if (request.trainQuery() == null) {
+            luceneQuery = Queries.newMatchAllQuery();
+        } else {
+            luceneQuery = queryParser.parse(request.trainQuery()).query();
+        }
         // we default to the analyzer at the first field
         Analyzer analyzer = getAnalyzerAtField(request.textFields()[0]);
 
