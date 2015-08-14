@@ -52,10 +52,6 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
     public static final Double DEFAULT_BOOLEAN_PERCEPTRON_THRESHOLD = null; // automatic
     public static final int DEFAULT_BOOLEAN_PERCEPTRON_BATCH_SIZE = 1;
 
-//    public static final int DEFAULT_KNN_K = 3;
-//    public static final int DEFAULT_KNN_MIN_DOC_FREQ = 0;
-//    public static final int DEFAULT_KNN_MIN_TERM_FREQ = 0;
-
     private IndexShard indexShard;
     private IndexQueryParserService queryParser;
 
@@ -121,14 +117,6 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
                             settings.getAsInt("batch_size", DEFAULT_BOOLEAN_PERCEPTRON_BATCH_SIZE));
                 }
                 return new BooleanPerceptronClassifier();
-//            case "knn":
-//                if (settings != null && settings.getAsMap().size() != 0) {
-//                    return new KNearestNeighborClassifier(
-//                            settings.getAsInt("k", DEFAULT_KNN_K), 
-//                            settings.getAsInt("min_doc_freq", DEFAULT_KNN_MIN_DOC_FREQ)
-//                            settings.getAsInt("min_term_freq", DEFAULT_KNN_MIN_TERM_FREQ));
-//                }
-//                return new KNearestNeighborClassifier(DEFAULT_KNN_K);
         }
         throw new IllegalArgumentException("unknown model type [" + modelType + "]");
     }
