@@ -47,6 +47,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
         public static final String SIMPLE_NAIVE_BAYES = "simple_naive_bayes";
         public static final String CACHING_NAIVE_BAYES = "caching_naive_bayes";
         public static final String BOOLEAN_PERCEPTRON = "boolean_perceptron";
+        public static final String KNN = "knn";
     }
 
     public static int DEFAULT_TOP_N = 3;
@@ -281,7 +282,7 @@ public class ClassifyRequest extends BroadcastRequest<ClassifyRequest> {
      */
     public ClassifyRequest modelType(String modelType) {
         if (!modelType.equals(ModelTypes.SIMPLE_NAIVE_BAYES) && !modelType.equals(ModelTypes.CACHING_NAIVE_BAYES) && 
-                !modelType.equals(ModelTypes.BOOLEAN_PERCEPTRON)) {
+                !modelType.equals(ModelTypes.BOOLEAN_PERCEPTRON) && !modelType.equals(ModelTypes.KNN)) {
             throw new IllegalArgumentException("unknown model type [" + modelType + "]");
         }
         this.modelType = modelType;

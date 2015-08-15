@@ -52,6 +52,10 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
     public static final Double DEFAULT_BOOLEAN_PERCEPTRON_THRESHOLD = null; // automatic
     public static final int DEFAULT_BOOLEAN_PERCEPTRON_BATCH_SIZE = 1;
 
+    public static final int DEFAULT_KNN_K = 3;
+    public static final int DEFAULT_KNN_MIN_DOC_FREQ = 0;
+    public static final int DEFAULT_KNN_MIN_TERM_FREQ = 0;
+
     private IndexShard indexShard;
     private IndexQueryParserService queryParser;
 
@@ -66,9 +70,9 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         // get the classifier
         Classifier classifier;
         if (request.modelType() == null) {
-            classifier = getClassifier(DEFAULT_MODEL_TYPE, request.modelSettings());
+            classifier = getClassifier(DEFAULT_MODEL_TYPE, request);
         } else {
-            classifier = getClassifier(request.modelType(), request.modelSettings());
+            classifier = getClassifier(request.modelType(), request);
         }
         // train the classifier
         train(classifier, request);  // boolean perceptron is always retrained for now
@@ -104,7 +108,8 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
         }
     }
 
-    private Classifier getClassifier(String modelType, Settings settings) {
+    private Classifier getClassifier(String modelType, ClassifyRequest request) {
+        Settings settings = request.modelSettings();
         switch (modelType) {
             case ModelTypes.SIMPLE_NAIVE_BAYES:
                 return new SimpleNaiveBayesClassifier();
@@ -117,6 +122,18 @@ public class ShardClassificationService extends AbstractIndexShardComponent {
                             settings.getAsInt("batch_size", DEFAULT_BOOLEAN_PERCEPTRON_BATCH_SIZE));
                 }
                 return new BooleanPerceptronClassifier();
+            case "knn":
+                KNearestNeighborClassifier knnClassifier;
+                if (settings != null && settings.getAsMap().size() != 0) {
+                    knnClassifier = new KNearestNeighborClassifier(
+                            settings.getAsInt("k", DEFAULT_KNN_K),
+                            settings.getAsInt("min_doc_freq", DEFAULT_KNN_MIN_DOC_FREQ),
+                            settings.getAsInt("min_term_freq", DEFAULT_KNN_MIN_TERM_FREQ));
+                } else {
+                    knnClassifier = new KNearestNeighborClassifier(DEFAULT_KNN_K);
+                }
+                knnClassifier.setMapperService(indexShard.mapperService(), request.trainIndex(), request.trainType());
+                return knnClassifier;
         }
         throw new IllegalArgumentException("unknown model type [" + modelType + "]");
     }
