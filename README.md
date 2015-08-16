@@ -1,6 +1,11 @@
 Elasticsearch Classification Plugin
 ===================================
 
+The Elasticsearch Classification Plugin is useful for simple classification
+tasks. A classifier is trained and evaluated per shard using the Lucene
+classification module. The results are then combined by taking an ensemble
+vote over each shard. Please see below for some examples of usage.
+
 Example of Usage
 ----------------
 
