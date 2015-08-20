@@ -1,13 +1,11 @@
-Elasticsearch Classification Plugin
-===================================
+# Elasticsearch Classification Plugin
 
 The Elasticsearch Classification Plugin is useful for simple classification
 tasks. A classifier is trained and evaluated per shard using the Lucene
 classification module. The results are then combined by taking an ensemble
 vote over each shard. Please see below for some examples of usage.
 
-Example of Usage
-----------------
+## Example of Usage
 
 ```js
 GET /tmdb/movies/_classify
@@ -82,45 +80,63 @@ and the response:
 }
 ```
 
-Parameters
-----------
+## Parameters
 
 The `index`, `type` specify where the model should be trained and evaluated.
 The request also supports a `routing` key with a URL parameter.
 
-The body of request has the following parameters:
+#### Main Parameters
+
+The body of the request has the following required parameters:
+
+Parameter | Description
+----------| -----------
+fields | an array of fields to train on
+class | the field holding the labels
+text | the text that should be evaluated
+
+The `fields` parameter could also be shorthanded with `field` if only one
+field is used. In this case the array syntax is dropped.
+
+The following parameters are optional:
 
 Parameter | Description | Default
 ----------| ------------| -------
 model | type of classifier to use | "simple_naive_bayes"
 settings | classifier specific settings | sensible defaults
-fields | an array of fields to train on | *required
-class | the field holding the labels | *required
 query | a query to filter which documents are used for training | match_all
-text | the text that should be evaluated | *required
+top_n | number of guessed classes to return | top 3 classes
 analyzer | analyzer to tokenize the text | analyzer at `fields[0]`
 
 The `model` parameter can take the following values: "boolean_perceptron",
-"simple_naive_bayes", "caching_naive_bayes", "knn".
+"simple_naive_bayes", "caching_naive_bayes", "knn". The `settings` parameter
+is `model` specific.
 
-The `settings` parameter is model specific. For example, a boolean Perceptron
-may need a `threshold` or `batch_size`, while kNN may need the value for `k`,
-`min_docs_freq`, or `min_term_freq`. This parameter uses sensible defaults as
-much as possible.
+#### Model Specific Parameters
 
-The `fields` parameter could also be shorthanded with `field` if only one
-field is used. In this case the array syntax is dropped.
+For Boolean Perceptron:
+
+Parameter | Description | Default
+--------- | ------------| -------
+threshold | when is the output true or false | automatic
+batch_size | how many examples to consider at once | 1
+
+For kNN:
+
+Parameter | Description | Default
+--------- | ------------| -------
+k | number of neighbors to consider | 3
+min_doc_freq | minimum document frequency for MLT | 0
+min_term_freq | minimum document frequency for MLT | 0
 
 The response is an array of scores listing all the classes guessed ordered by
 decreasing `score`.
 
-Caution
--------
+## Caution
 
 Don't use on high cardinality fields, as the process could take a long time.
 
-Installation
-------------
+## Installation
 
 To build a `SNAPSHOT` version, you can either build it with Maven:
 
@@ -130,7 +146,7 @@ bin/plugin install classification \
        --url file:target/releases/elasticsearch-classification-X.X.X-SNAPSHOT.zip
 ```
 
-Or grab the latest binary for the Elasticsearch [2.0](https://github.com/elastic/elasticsearch-classification/releases/download/v2.0.0-beta1/elasticsearch-classification-2.0.0-beta1-SNAPSHOT.zip) or for 
+Or grab the latest binary for the Elasticsearch [2.0](https://github.com/elastic/elasticsearch-classification/releases/download/v2.0.0-beta1/elasticsearch-classification-2.0.0-beta1-SNAPSHOT.zip) or for
 [1.x](https://github.com/elastic/elasticsearch-classification/releases/download/v1.0.1/elasticsearch-classification-1.0.1-SNAPSHOT.zip) and install it:
 
 ```bash
@@ -138,8 +154,7 @@ cd /path/to/elasticsearch/
 bin/plugin install classification --url file:/path/to/downloads/elasticsearch-classification-X.X.X-SNAPSHOT.zip
 ```
 
-License
--------
+## License
 
     This software is licensed under the Apache 2 license, quoted below.
 
