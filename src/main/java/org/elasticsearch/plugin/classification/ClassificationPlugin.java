@@ -19,14 +19,14 @@
 
 package org.elasticsearch.plugin.classification;
 
-import org.elasticsearch.common.inject.Module;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.plugins.AbstractPlugin;
+import org.elasticsearch.action.ActionModule;
+import org.elasticsearch.action.classify.ClassifyAction;
+import org.elasticsearch.action.classify.TransportClassifyAction;
+import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.rest.RestModule;
+import org.elasticsearch.rest.action.classify.RestClassifyAction;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-public class ClassificationPlugin extends AbstractPlugin {
+public class ClassificationPlugin extends Plugin {
 
     public static final String NAME = "classification";
 
@@ -40,8 +40,11 @@ public class ClassificationPlugin extends AbstractPlugin {
         return "Elasticsearch Classification Plugin";
     }
 
-    @Override
-    public Collection<Module> modules(Settings settings) {
-        return Arrays.asList((Module) new ClassificationModule());
+    public void onModule(ActionModule actionModule) {
+        actionModule.registerAction(ClassifyAction.INSTANCE, TransportClassifyAction.class);
+    }
+
+    public void onModule(RestModule restModule) {
+        restModule.addRestAction(RestClassifyAction.class);
     }
 }
